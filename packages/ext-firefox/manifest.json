@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "ocswitch",
+  "version": "0.1.0",
+  "description": "VPN только внутри браузера: весь трафик, список сайтов или ничего.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ocswitch@romancox.dev",
+      "strict_min_version": "128.0"
+    }
+  },
+  "permissions": ["proxy", "storage", "activeTab", "privacy"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "action": {
+    "default_title": "ocswitch",
+    "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "page": "options.html"
+  }
+}

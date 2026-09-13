@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "ocswitch",
+  "version": "0.1.0",
+  "description": "VPN только внутри браузера: весь трафик, список сайтов или ничего.",
+  "permissions": ["proxy", "storage", "activeTab", "privacy"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "ocswitch",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html"
+}

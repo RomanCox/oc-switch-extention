@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>ocswitch</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <!-- Переключатель на четыре положения, а не четыре тумблера:
+       режимы взаимоисключающие. -->
+  <fieldset id="modes">
+    <legend>Режим</legend>
+    <label><input type="radio" name="mode" value="off" id="mode-off"><span>Мимо VPN</span></label>
+    <label><input type="radio" name="mode" value="all" id="mode-all"><span>Всё через VPN</span></label>
+    <label><input type="radio" name="mode" value="include" id="mode-include"><span>Список через VPN</span></label>
+    <label><input type="radio" name="mode" value="exclude" id="mode-exclude"><span>Список мимо VPN</span></label>
+  </fieldset>
+  <p id="status">—</p>
+  <button id="add-current" type="button">+ текущий домен</button>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
