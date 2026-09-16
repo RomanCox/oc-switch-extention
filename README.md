@@ -21,9 +21,9 @@ macOS и Linux:
 
 ## 2. Собрать расширение
 
-    npm install
-    npm test
-    npm run build
+    pnpm install
+    pnpm test
+    pnpm run build
 
 ## 3. Установить
 

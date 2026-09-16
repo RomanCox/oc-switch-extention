@@ -46,9 +46,9 @@ SOCKS5-прокси `127.0.0.1:11080`, за которым стоит личны
 
 ## Команды
 
-    npm test        vitest
-    npm run check   tsc --noEmit
-    npm run build   сборка обоих расширений в dist/ (фаза 2)
+    pnpm test        vitest
+    pnpm run check   tsc --noEmit
+    pnpm run build   сборка обоих расширений в dist/ (фаза 2)
 
 ## Порядок работ
 
