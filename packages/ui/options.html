@@ -5,8 +5,73 @@
   <title>ocswitch — настройки</title>
   <link rel="stylesheet" href="popup.css">
 </head>
-<body>
-  <p>Редактор списка доменов появится в фазе 3.</p>
+<body class="options">
+  <header>
+    <h1>ocswitch<span class="dot">_</span></h1>
+    <p class="tagline">настройки</p>
+  </header>
+
+  <main class="card list-card list-card-sync">
+    <label class="list-title">Синхронизация — общий список между браузерами</label>
+    <p class="list-hint">
+      Свой сервер (см. <code>server/sync-server.mjs</code>), хранит один JSON с правилами.
+      «Сохранить» отправляет текущие списки на сервер, если синхронизация включена.
+      Каждый браузер сам подтягивает изменения при запуске и раз в 15 минут —
+      «Обновить сейчас» делает то же самое немедленно.
+    </p>
+    <div class="sync-fields">
+      <input id="sync-url" type="url" placeholder="https://admin.romancox.dev:8790" autocomplete="off" spellcheck="false">
+      <input id="sync-token" type="password" placeholder="токен" autocomplete="off" spellcheck="false">
+      <label class="sync-checkbox"><input type="checkbox" id="sync-enabled"> включить синхронизацию</label>
+    </div>
+    <div class="actions">
+      <button id="sync-pull" type="button">Обновить сейчас</button>
+    </div>
+    <p id="sync-status" class="save-status"></p>
+  </main>
+
+  <main class="card list-card list-card-proxy">
+    <label for="rules-proxy" class="list-title">+VPN — сайты, которые открываются через туннель</label>
+    <p class="list-hint">
+      По одному хосту на строку. <code>*.example.com</code> — поддомены.
+      <code>#</code> в начале строки — отключить правило.
+      <code>!</code> перед хостом — <b>всегда</b> через VPN, даже в режиме «мимо VPN» и при выключенном прокси.
+      Без <code>!</code> — правило действует только в режиме «Список через VPN».
+    </p>
+    <textarea
+      id="rules-proxy"
+      rows="8"
+      spellcheck="false"
+      autocomplete="off"
+      placeholder="jira.corp.example.com&#10;!admin.internal.example.com&#10;# disabled.example.com"
+    ></textarea>
+    <ul id="errors-proxy" class="errors"></ul>
+  </main>
+
+  <main class="card list-card list-card-direct">
+    <label for="rules-direct" class="list-title">−VPN — сайты, которые открываются мимо туннеля</label>
+    <p class="list-hint">
+      Та же разметка. <code>!</code> перед хостом — <b>всегда</b> мимо VPN, даже в режиме «всё через VPN».
+      Без <code>!</code> — правило действует только в режиме «Список мимо VPN».
+    </p>
+    <textarea
+      id="rules-direct"
+      rows="8"
+      spellcheck="false"
+      autocomplete="off"
+      placeholder="*.internal.example.com&#10;!banking.example.com"
+    ></textarea>
+    <ul id="errors-direct" class="errors"></ul>
+  </main>
+
+  <div class="actions actions-global">
+    <button id="save" type="button">Сохранить</button>
+    <button id="import" type="button">Импорт JSON</button>
+    <button id="export" type="button">Экспорт JSON</button>
+  </div>
+  <input id="import-file" type="file" accept="application/json" hidden>
+  <p id="save-status" class="save-status"></p>
+
   <script type="module" src="options.js"></script>
 </body>
 </html>

@@ -1,4 +1,11 @@
-import { buildPacScript, DEFAULT_SETTINGS, type Mode, type Settings } from '../../core/src/index.js';
+import {
+  buildPacScript,
+  DEFAULT_SETTINGS,
+  isRemoteNewer,
+  pullRules,
+  type Mode,
+  type Settings,
+} from '../../core/src/index.js';
 
 /**
  * Chrome-адаптер. Своей логики маршрутизации не имеет:
@@ -6,6 +13,8 @@ import { buildPacScript, DEFAULT_SETTINGS, type Mode, type Settings } from '../.
  */
 
 const STORAGE_KEY = 'settings';
+const SYNC_ALARM = 'ocswitch-sync-pull';
+const SYNC_PERIOD_MINUTES = 15;
 
 const BADGE_TEXT: Record<Mode, string> = {
   off: '',
@@ -42,8 +51,28 @@ export async function applySettings(settings: Settings): Promise<void> {
   await chrome.action.setBadgeBackgroundColor({ color: BADGE_COLOR[settings.mode] });
 }
 
+/**
+ * Подтягивает правила с сервера синхронизации, если он настроен и включён.
+ * Применяет только если серверная версия свежее локальной («побеждает
+ * последний») — сохранение через onChanged пере-применит PAC само.
+ */
+async function syncPull(): Promise<void> {
+  const settings = await loadSettings();
+  if (!settings.sync.enabled || !settings.sync.url || !settings.sync.token) return;
+  try {
+    const remote = await pullRules({ url: settings.sync.url, token: settings.sync.token });
+    const local = { rules: settings.rules, updatedAt: settings.rulesUpdatedAt };
+    if (!isRemoteNewer(local, remote)) return;
+    const next: Settings = { ...settings, rules: remote.rules, rulesUpdatedAt: remote.updatedAt };
+    await chrome.storage.local.set({ [STORAGE_KEY]: next });
+  } catch (err) {
+    console.error('ocswitch: синхронизация не удалась', err);
+  }
+}
+
 async function restore(): Promise<void> {
-  applySettings(await loadSettings());
+  await applySettings(await loadSettings());
+  void syncPull();
 }
 
 // Service worker может выгружаться между событиями — состояние держит
@@ -52,8 +81,13 @@ chrome.runtime.onStartup.addListener(restore);
 chrome.runtime.onInstalled.addListener(restore);
 void restore();
 
-// Попап ничего не знает про proxy.* — он только пишет в storage.local,
-// а сюда прилетает onChanged и применяет решение.
+chrome.alarms.create(SYNC_ALARM, { periodInMinutes: SYNC_PERIOD_MINUTES });
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === SYNC_ALARM) void syncPull();
+});
+
+// Попап и options ничего не знают про proxy.* — они только пишут
+// в storage.local, а сюда прилетает onChanged и применяет решение.
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local' || !changes[STORAGE_KEY]) return;
   const next: Settings = {

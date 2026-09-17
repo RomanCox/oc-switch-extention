@@ -1,4 +1,10 @@
-import { ALWAYS_DIRECT, type Settings } from './types.js';
+import { ALWAYS_DIRECT, type Rule, type Settings } from './types.js';
+
+function patterns(rules: readonly Rule[], list: Rule['list'], strength?: Rule['strength']): string[] {
+  return rules
+    .filter((rule) => rule.enabled && rule.list === list && (strength === undefined || rule.strength === strength))
+    .map((rule) => rule.pattern);
+}
 
 /**
  * Собирает PAC-скрипт для chrome.proxy.
@@ -12,7 +18,10 @@ import { ALWAYS_DIRECT, type Settings } from './types.js';
  * Расхождение этой реализации с decide() ловит тест-близнец.
  */
 export function buildPacScript(settings: Settings): string {
-  const rules = settings.rules.filter((rule) => rule.enabled).map((rule) => rule.pattern);
+  const forceProxy = patterns(settings.rules, 'proxy', 'force');
+  const forceDirect = patterns(settings.rules, 'direct', 'force');
+  const proxyList = patterns(settings.rules, 'proxy');
+  const directList = patterns(settings.rules, 'direct');
   const proxy = `SOCKS5 ${settings.proxy.host}:${settings.proxy.port}`;
 
   return `
@@ -35,18 +44,22 @@ function matchAny(host, patterns) {
 
 var ALWAYS_DIRECT = ${JSON.stringify(ALWAYS_DIRECT)};
 var MODE = ${JSON.stringify(settings.mode)};
-var RULES = ${JSON.stringify(rules)};
+var FORCE_PROXY = ${JSON.stringify(forceProxy)};
+var FORCE_DIRECT = ${JSON.stringify(forceDirect)};
+var PROXY_LIST = ${JSON.stringify(proxyList)};
+var DIRECT_LIST = ${JSON.stringify(directList)};
 var PROXY = ${JSON.stringify(proxy)};
 
 function FindProxyForURL(url, host) {
   if (matchAny(host, ALWAYS_DIRECT)) return "DIRECT";
 
-  var matched = matchAny(host, RULES);
+  if (matchAny(host, FORCE_PROXY)) return PROXY;
+  if (matchAny(host, FORCE_DIRECT)) return "DIRECT";
 
   if (MODE === "off") return "DIRECT";
   if (MODE === "all") return PROXY;
-  if (MODE === "include") return matched ? PROXY : "DIRECT";
-  if (MODE === "exclude") return matched ? "DIRECT" : PROXY;
+  if (MODE === "include") return matchAny(host, PROXY_LIST) ? PROXY : "DIRECT";
+  if (MODE === "exclude") return matchAny(host, DIRECT_LIST) ? "DIRECT" : PROXY;
   return "DIRECT";
 }
 `;

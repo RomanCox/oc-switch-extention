@@ -7,7 +7,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "tsc --noEmit -p tsconfig.json",
-    "build": "node scripts/build.mjs"
+    "build": "node scripts/build.mjs",
+    "sync-server": "node server/sync-server.mjs"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.268",

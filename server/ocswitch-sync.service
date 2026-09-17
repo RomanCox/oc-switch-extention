@@ -1,0 +1,18 @@
+[Unit]
+Description=ocswitch sync server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env node /opt/ocswitch/server/sync-server.mjs
+WorkingDirectory=/opt/ocswitch
+EnvironmentFile=/etc/ocswitch-sync.env
+Restart=on-failure
+RestartSec=5
+User=ocswitch
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/ocswitch/server
+
+[Install]
+WantedBy=multi-user.target

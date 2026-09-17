@@ -3,7 +3,8 @@
   "name": "ocswitch",
   "version": "0.1.0",
   "description": "VPN только внутри браузера: весь трафик, список сайтов или ничего.",
-  "permissions": ["proxy", "storage", "activeTab", "privacy"],
+  "permissions": ["proxy", "storage", "activeTab", "privacy", "alarms"],
+  "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js",
     "type": "module"

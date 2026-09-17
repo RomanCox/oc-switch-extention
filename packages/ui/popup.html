@@ -16,7 +16,15 @@
     <label><input type="radio" name="mode" value="exclude" id="mode-exclude"><span>Список мимо VPN</span></label>
   </fieldset>
   <p id="status">—</p>
+  <div id="host-info" class="host-info">
+    <span id="host-name">—</span>
+    <span id="host-verdict" class="verdict">—</span>
+  </div>
   <button id="add-current" type="button">+ текущий домен</button>
+  <p id="private-warning" class="private-warning" hidden>
+    ⚠ приватные окна не защищены — <code>about:addons</code> → ocswitch →
+    Подробнее → «Запускать в приватных окнах»
+  </p>
   <script type="module" src="popup.js"></script>
 </body>
 </html>
