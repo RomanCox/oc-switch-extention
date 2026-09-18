@@ -4,20 +4,17 @@ VPN только внутри браузера: переключатель на 
 
 ## 1. Поднять туннель
 
-Windows:
+Фоновая установка для Windows, Linux и macOS — в `vpn-kit/README.md`.
+Ставится один раз, поднимается сам при входе в систему, переживает
+обрывы связи и заодно даёт HTTP-прокси для Claude CLI и консольных
+инструментов.
 
-    .\tunnel\start-tunnel.ps1 -User <user> -Host admin.romancox.dev
+Быстрая проверка после установки:
 
-macOS и Linux:
+    .\vpn-kit\windows\check.ps1     # Windows
+    ./vpn-kit/unix/check.sh         # Linux, macOS
 
-    ./tunnel/start-tunnel.sh <user> admin.romancox.dev
-
-Окно должно остаться открытым. Проверка из другого окна:
-
-    curl.exe --socks5-hostname 127.0.0.1:11080 https://ifconfig.me
-    curl.exe https://ifconfig.me
-
-Адреса должны отличаться.
+Показывает внешний IP напрямую и через прокси — адреса должны отличаться.
 
 ## 2. Собрать расширение
 

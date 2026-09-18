@@ -126,5 +126,7 @@ Chrome/Opera эта проблема не касается: там прокси 
 ## Фаза 6 — упаковка
 
 - [ ] zip для Chrome, xpi с unlisted-подписью AMO для Firefox
-- [ ] скрипты запуска туннеля для macOS и Linux
-- [ ] README для чистой машины
+- [x] скрипты запуска туннеля для macOS и Linux — `vpn-kit/unix`,
+      `vpn-kit/linux`, `vpn-kit/macos` (systemd --user / launchd, фоновый
+      автозапуск, как на Windows)
+- [x] README для чистой машины — `vpn-kit/README.md` (Windows/Linux/macOS)

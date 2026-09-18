@@ -1,0 +1,13 @@
+[Unit]
+Description=ocswitch SSH tunnel (SOCKS5 for apps, HTTP proxy for CLI)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=__TUNNEL_SH__
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
