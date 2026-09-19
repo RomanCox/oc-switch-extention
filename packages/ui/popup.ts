@@ -2,8 +2,8 @@ import {
   decide,
   DEFAULT_SETTINGS,
   findMatchingRule,
-  pushRules,
   type Mode,
+  pushRules,
   type Rule,
   type Settings,
 } from '../core/src/index.js';
@@ -109,8 +109,7 @@ async function renderPrivateWarning(): Promise<void> {
     return;
   }
   try {
-    const allowed = await browser.extension.isAllowedIncognitoAccess();
-    el.hidden = allowed;
+    el.hidden = await browser.extension.isAllowedIncognitoAccess();
   } catch {
     el.hidden = true;
   }
