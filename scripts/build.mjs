@@ -50,6 +50,11 @@ async function buildTarget(name, { background, backgroundFormat, manifest }) {
   const optionsCss = join(ROOT, 'packages/ui/options.css');
   if (existsSync(optionsCss)) cpSync(optionsCss, join(outDir, 'options.css'));
 
+  mkdirSync(join(outDir, 'icon'), { recursive: true });
+  for (const size of [16, 32, 48, 128]) {
+    cpSync(join(ROOT, 'icon', `icon-${size}.png`), join(outDir, 'icon', `icon-${size}.png`));
+  }
+
   console.log(`собрано: dist/${name}`);
 }
 
