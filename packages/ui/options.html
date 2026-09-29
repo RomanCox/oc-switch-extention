@@ -33,36 +33,25 @@
   </main>
 
   <main class="card list-card list-card-proxy">
-    <label for="rules-proxy" class="list-title">+VPN — сайты, которые открываются через туннель</label>
+    <label class="list-title">+VPN — сайты, которые открываются через туннель</label>
     <p class="list-hint">
-      По одному хосту на строку. <code>*.example.com</code> — поддомены.
-      <code>#</code> в начале строки — отключить правило.
-      <code>!</code> перед хостом — <b>всегда</b> через VPN, даже в режиме «мимо VPN» и при выключенном прокси.
-      Без <code>!</code> — правило действует только в режиме «Список через VPN».
+      <code>*.example.com</code> — поддомены. <b>вкл</b> — включить/выключить правило, не удаляя его.
+      <b>always</b> — правило действует <b>всегда</b>, даже в режиме «мимо VPN» и при выключенном прокси.
+      Без <b>always</b> — только в режиме «Список через VPN».
     </p>
-    <textarea
-      id="rules-proxy"
-      rows="8"
-      spellcheck="false"
-      autocomplete="off"
-      placeholder="jira.corp.example.com&#10;!admin.internal.example.com&#10;# disabled.example.com"
-    ></textarea>
+    <div id="rows-proxy" class="rule-rows"></div>
+    <button id="add-proxy" type="button" class="rule-add">+ добавить хост</button>
     <ul id="errors-proxy" class="errors"></ul>
   </main>
 
   <main class="card list-card list-card-direct">
-    <label for="rules-direct" class="list-title">−VPN — сайты, которые открываются мимо туннеля</label>
+    <label class="list-title">−VPN — сайты, которые открываются мимо туннеля</label>
     <p class="list-hint">
-      Та же разметка. <code>!</code> перед хостом — <b>всегда</b> мимо VPN, даже в режиме «всё через VPN».
-      Без <code>!</code> — правило действует только в режиме «Список мимо VPN».
+      Та же разметка. <b>always</b> — правило действует <b>всегда</b>, даже в режиме «всё через VPN».
+      Без <b>always</b> — только в режиме «Список мимо VPN».
     </p>
-    <textarea
-      id="rules-direct"
-      rows="8"
-      spellcheck="false"
-      autocomplete="off"
-      placeholder="*.internal.example.com&#10;!banking.example.com"
-    ></textarea>
+    <div id="rows-direct" class="rule-rows"></div>
+    <button id="add-direct" type="button" class="rule-add">+ добавить хост</button>
     <ul id="errors-direct" class="errors"></ul>
   </main>
 

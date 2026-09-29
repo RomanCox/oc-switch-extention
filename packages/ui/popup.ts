@@ -5,6 +5,7 @@ import {
   type Mode,
   pushRules,
   type Rule,
+  type RuleList,
   type Settings,
 } from '../core/src/index.js';
 
@@ -91,6 +92,7 @@ function renderHostInfo(host: string | null, settings: Settings): void {
 async function refreshHostInfo(): Promise<void> {
   const settings = await loadSettings();
   renderHostInfo(currentHost, settings);
+  renderDomainActions(currentHost, settings);
 }
 
 /**
@@ -115,28 +117,68 @@ async function renderPrivateWarning(): Promise<void> {
   }
 }
 
-async function addCurrentDomain(): Promise<void> {
+function existingRuleForHost(rules: readonly Rule[], host: string): Rule | undefined {
+  return rules.find((rule) => rule.pattern.toLowerCase() === host.toLowerCase());
+}
+
+/** Сохраняет новый список правил и, если включена синхронизация, отправляет его на сервер. */
+async function commitRules(settings: Settings, rules: Rule[]): Promise<void> {
+  const rulesUpdatedAt = Date.now();
+  await saveSettings({ ...settings, rules, rulesUpdatedAt });
+
+  // Как и «Сохранить» в options — если синхронизация включена, отправляем
+  // изменение на сервер. Без статуса в UI: попап слишком мал и закрывается
+  // сразу после клика, ошибку в худшем случае подтянет следующий pull.
+  if (settings.sync.enabled && settings.sync.url && settings.sync.token) {
+    void pushRules({ url: settings.sync.url, token: settings.sync.token }, { rules, updatedAt: rulesUpdatedAt }).catch(
+      (err: unknown) => console.error('ocswitch: отправка на сервер не удалась', err),
+    );
+  }
+}
+
+async function addCurrentDomain(list: RuleList): Promise<void> {
   if (!currentHost) return;
   const settings = await loadSettings();
-  const already = settings.rules.some((rule) => rule.pattern.toLowerCase() === currentHost?.toLowerCase());
-  if (!already) {
-    const rules: Rule[] = [
-      ...settings.rules,
-      { pattern: currentHost, enabled: true, list: 'proxy', strength: 'soft' },
-    ];
-    const rulesUpdatedAt = Date.now();
-    await saveSettings({ ...settings, rules, rulesUpdatedAt });
-
-    // Как и «Сохранить» в options — если синхронизация включена, отправляем
-    // изменение на сервер. Без статуса в UI: попап слишком мал и закрывается
-    // сразу после клика, ошибку в худшем случае подтянет следующий pull.
-    if (settings.sync.enabled && settings.sync.url && settings.sync.token) {
-      void pushRules({ url: settings.sync.url, token: settings.sync.token }, { rules, updatedAt: rulesUpdatedAt }).catch(
-        (err: unknown) => console.error('ocswitch: отправка на сервер не удалась', err),
-      );
-    }
-  }
+  if (existingRuleForHost(settings.rules, currentHost)) return;
+  const rules: Rule[] = [...settings.rules, { pattern: currentHost, enabled: true, list, strength: 'soft' }];
+  await commitRules(settings, rules);
   await refreshHostInfo();
+}
+
+async function removeCurrentDomain(): Promise<void> {
+  if (!currentHost) return;
+  const settings = await loadSettings();
+  const rules = settings.rules.filter((rule) => rule.pattern.toLowerCase() !== currentHost?.toLowerCase());
+  if (rules.length === settings.rules.length) return;
+  await commitRules(settings, rules);
+  await refreshHostInfo();
+}
+
+const LIST_LABELS: Record<RuleList, string> = { proxy: '+VPN', direct: '−VPN' };
+
+function renderDomainActions(host: string | null, settings: Settings): void {
+  const container = document.getElementById('domain-actions');
+  if (!(container instanceof HTMLElement)) return;
+  container.innerHTML = '';
+  if (!host) return;
+
+  const existing = existingRuleForHost(settings.rules, host);
+  if (existing) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = `− убрать из ${LIST_LABELS[existing.list]}`;
+    button.addEventListener('click', () => void removeCurrentDomain());
+    container.appendChild(button);
+    return;
+  }
+
+  for (const list of ['proxy', 'direct'] as const) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = `+ ${LIST_LABELS[list]}`;
+    button.addEventListener('click', () => void addCurrentDomain(list));
+    container.appendChild(button);
+  }
 }
 
 async function init(): Promise<void> {
@@ -146,6 +188,7 @@ async function init(): Promise<void> {
 
   currentHost = await getActiveTabHost();
   renderHostInfo(currentHost, settings);
+  renderDomainActions(currentHost, settings);
   void renderPrivateWarning();
 
   document.getElementById('modes')?.addEventListener('change', (event) => {
@@ -155,12 +198,6 @@ async function init(): Promise<void> {
     renderStatus(mode);
     void saveMode(mode).then(refreshHostInfo);
   });
-
-  const addButton = document.getElementById('add-current');
-  if (addButton instanceof HTMLButtonElement) {
-    addButton.disabled = currentHost === null;
-    addButton.addEventListener('click', () => void addCurrentDomain());
-  }
 
   api.storage.onChanged.addListener((changes, area) => {
     if (area !== 'local' || !changes[STORAGE_KEY]) return;
