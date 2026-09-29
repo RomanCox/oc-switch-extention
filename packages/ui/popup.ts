@@ -175,7 +175,7 @@ function renderDomainActions(host: string | null, settings: Settings): void {
   for (const list of ['proxy', 'direct'] as const) {
     const button = document.createElement('button');
     button.type = 'button';
-    button.textContent = `+ ${LIST_LABELS[list]}`;
+    button.textContent = `Add to ${LIST_LABELS[list]}`;
     button.addEventListener('click', () => void addCurrentDomain(list));
     container.appendChild(button);
   }
